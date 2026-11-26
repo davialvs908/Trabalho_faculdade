@@ -85,56 +85,12 @@
       </div>
     </footer>
 
-    <dialog id="details" aria-labelledby="modal-title" aria-describedby="modal-synopsis" aria-modal="true">
-      <div class="modal-panel">
-        <img id="modal-cover" alt="" width="320" height="460">
-        <div class="modal-body">
-          <header class="modal-header">
-            <div>
-              <h2 id="modal-title"></h2>
-              <p id="modal-subtitle" class="subtitle" hidden></p>
-            </div>
-            <button type="button" id="modal-close">Fechar</button>
-          </header>
-          <dl class="facts">
-            <div>
-              <dt>Nota</dt>
-              <dd id="modal-score"></dd>
-            </div>
-            <div>
-              <dt id="modal-count-label">Episódios</dt>
-              <dd id="modal-count"></dd>
-            </div>
-            <div>
-              <dt>Status</dt>
-              <dd id="modal-status"></dd>
-            </div>
-            <div>
-              <dt>Ano</dt>
-              <dd id="modal-year"></dd>
-            </div>
-            <div class="fact-wide">
-              <dt>Gêneros</dt>
-              <dd id="modal-genres"></dd>
-            </div>
-          </dl>
-          <h3>Sinopse</h3>
-          <div id="modal-synopsis" class="synopsis-full"></div>
-          <p id="modal-origin" class="origin-note" hidden>Sinopse original</p>
-          <div class="modal-links">
-            <a id="modal-trailer" href="" target="_blank" rel="noopener noreferrer" hidden>Assistir trailer</a>
-            <a id="modal-mal" href="" target="_blank" rel="noopener noreferrer" hidden>Ver no MyAnimeList</a>
-          </div>
-        </div>
-      </div>
-    </dialog>
-
     <template id="card-template">
       <li>
         <article class="card">
           <img alt="" width="300" height="450">
           <div class="card-body">
-            <h3><button type="button" class="card-open"></button></h3>
+            <h3><a class="card-open" href="detalhe.html"></a></h3>
             <p class="score"></p>
             <p class="synopsis"></p>
             <p class="origin-note" hidden>Sinopse original</p>

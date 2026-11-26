@@ -115,6 +115,23 @@ export function buildGenresUrl(type) {
   return `${BASE}/genres/${catalogType(type)}?${params.toString()}`;
 }
 
+function entryId(id) {
+  if (!/^\d{1,10}$/.test(String(id || ""))) throw failure("Identificador inválido.", "input");
+  return String(id);
+}
+
+export function buildDetailUrl(type, id) {
+  return `${BASE}/${catalogType(type)}/${entryId(id)}/full`;
+}
+
+export function buildCharactersUrl(type, id) {
+  return `${BASE}/${catalogType(type)}/${entryId(id)}/characters`;
+}
+
+export function buildRecommendationsUrl(type, id) {
+  return `${BASE}/${catalogType(type)}/${entryId(id)}/recommendations`;
+}
+
 export function readCatalog(payload) {
   if (!payload || typeof payload !== "object" || !Array.isArray(payload.data)) throw invalidPayload();
   const items = payload.data.filter((item) => {
@@ -128,6 +145,26 @@ export function readGenres(payload) {
   if (!payload || typeof payload !== "object" || !Array.isArray(payload.data)) throw invalidPayload();
   return payload.data.filter((genre) => {
     return genre && Number.isInteger(genre.mal_id) && typeof genre.name === "string" && genre.name.trim();
+  });
+}
+
+export function readDetail(payload) {
+  const item = payload?.data;
+  if (!item || typeof item !== "object" || !Number.isInteger(item.mal_id) || typeof item.title !== "string" || !item.title.trim()) {
+    throw invalidPayload();
+  }
+  return item;
+}
+
+export function readCharacters(payload) {
+  if (!payload || typeof payload !== "object" || !Array.isArray(payload.data)) throw invalidPayload();
+  return payload.data.filter((row) => row?.character && typeof row.character.name === "string" && row.character.name.trim());
+}
+
+export function readRecommendations(payload) {
+  if (!payload || typeof payload !== "object" || !Array.isArray(payload.data)) throw invalidPayload();
+  return payload.data.filter((row) => {
+    return row?.entry && Number.isInteger(row.entry.mal_id) && typeof row.entry.title === "string" && row.entry.title.trim();
   });
 }
 

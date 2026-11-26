@@ -1,6 +1,6 @@
 import { buildGenresUrl, buildSearchUrl, enqueue, fetchJson, readCatalog, readGenres } from "./api.js";
-import { FALLBACK_GENRES, translateGenre, visibleGenres } from "./labels.js";
-import { clearError, fillModal, renderCards, renderGenres, renderStatusOptions, setLoading, setStatus, showError, showSynopsis } from "./render.js";
+import { FALLBACK_GENRES, STATUS_OPTIONS, translateGenre, visibleGenres } from "./labels.js";
+import { clearError, renderCards, renderGenres, renderStatusOptions, setLoading, setStatus, showError, showSynopsis } from "./render.js";
 import { readCachedSynopsis, rememberSynopsis, translateSynopsis } from "./translate.js";
 
 const SEARCH_DEBOUNCE_MS = 400;
@@ -16,11 +16,14 @@ const state = {
   genres: { anime: null, manga: null },
 };
 
-const dialog = document.querySelector("#details");
 const form = document.querySelector("#search-form");
 let debounceTimer = 0;
-let returnFocus = null;
 let translationController = null;
+
+const STATUS_VALUES = {
+  anime: new Set(STATUS_OPTIONS.anime.map(([value]) => value)),
+  manga: new Set(STATUS_OPTIONS.manga.map(([value]) => value)),
+};
 
 function readForm() {
   const data = new FormData(form);
@@ -30,50 +33,41 @@ function readForm() {
   state.status = String(data.get("status") || "");
 }
 
-function focusable(root) {
-  const selector = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
-  return [...root.querySelectorAll(selector)].filter((element) => {
-    if (element.hasAttribute("hidden") || element.closest("[hidden]")) return false;
-    return element.getClientRects().length > 0;
-  });
+function searchParamsFromState() {
+  const params = new URLSearchParams();
+  const query = state.q.trim().slice(0, 100);
+  if (query) params.set("q", query);
+  if (state.type === "manga") params.set("tipo", "manga");
+  if (/^\d+$/.test(state.genre)) params.set("genero", state.genre);
+  if (STATUS_VALUES[state.type].has(state.status)) params.set("status", state.status);
+  return params;
 }
 
-function trapFocus(event) {
-  if (event.key === "Escape") {
-    event.preventDefault();
-    dialog.close();
-    return;
-  }
-  if (event.key !== "Tab") return;
-  const items = focusable(dialog);
-  if (items.length === 0) {
-    event.preventDefault();
-    return;
-  }
-  const first = items[0];
-  const last = items[items.length - 1];
-  const active = document.activeElement;
-  const outside = !dialog.contains(active);
-  if (event.shiftKey && (active === first || outside)) {
-    event.preventDefault();
-    last.focus();
-  } else if (!event.shiftKey && (active === last || outside)) {
-    event.preventDefault();
-    first.focus();
+function rememberReturn() {
+  const params = searchParamsFromState();
+  const search = params.toString();
+  const next = search ? `${location.pathname}?${search}` : location.pathname;
+  if (`${location.pathname}${location.search}` !== next) history.replaceState(null, "", next);
+  try {
+    sessionStorage.setItem("catalogo-retorno", search ? `?${search}` : "");
+  } catch {
+    /* o navegador pode recusar o armazenamento */
   }
 }
 
-function openDetails(item, trigger) {
-  returnFocus = trigger;
-  fillModal(item, state.type);
-  if (!dialog.open) dialog.showModal();
-  document.querySelector("#modal-close").focus();
-}
-
-function restoreFocus() {
-  const target = returnFocus;
-  returnFocus = null;
-  if (target && typeof target.focus === "function") target.focus();
+function readQuery() {
+  const params = new URLSearchParams(location.search);
+  const type = params.get("tipo") === "manga" ? "manga" : "anime";
+  const query = (params.get("q") || "").slice(0, 100);
+  const genre = /^\d+$/.test(params.get("genero") || "") ? params.get("genero") : "";
+  const status = STATUS_VALUES[type].has(params.get("status") || "") ? params.get("status") : "";
+  form.querySelector("#q").value = query;
+  const radio = form.querySelector(`input[name="type"][value="${type}"]`);
+  if (radio) radio.checked = true;
+  state.q = query;
+  state.type = type;
+  state.genre = genre;
+  state.status = renderStatusOptions(type, status);
 }
 
 async function loadGenres(type) {
@@ -91,12 +85,16 @@ async function loadGenres(type) {
   } catch {
     state.genres[type] = FALLBACK_GENRES;
   }
-  if (state.type === type) state.genre = renderGenres(state.genres[type], state.genre);
+  if (state.type === type) {
+    state.genre = renderGenres(state.genres[type], state.genre);
+    rememberReturn();
+  }
 }
 
 async function runSearch() {
   const id = state.requestId + 1;
   state.requestId = id;
+  rememberReturn();
   state.controller?.abort();
   translationController?.abort();
   const controller = new AbortController();
@@ -215,33 +213,14 @@ for (const radio of form.querySelectorAll('input[name="type"]')) {
   radio.addEventListener("change", onTypeChange);
 }
 
-document.querySelector("#catalog").addEventListener("click", (event) => {
-  const button = event.target.closest(".card-open");
-  if (!button) return;
-  const item = state.items.get(button.dataset.id);
-  if (!item) return;
-  openDetails(item, button);
-});
-
 document.querySelector("#retry").addEventListener("click", () => {
   scheduleSearch(true);
 });
 
-document.querySelector("#modal-close").addEventListener("click", () => {
-  dialog.close();
-});
-
-dialog.addEventListener("click", (event) => {
-  if (event.target === dialog) dialog.close();
-});
-
-dialog.addEventListener("keydown", trapFocus);
-dialog.addEventListener("close", restoreFocus);
-
 if (location.protocol === "file:") {
   showError("Abra este catálogo por um servidor HTTP. Os módulos JavaScript não funcionam em um arquivo local.");
 } else {
-  state.status = renderStatusOptions("anime", "");
+  readQuery();
   void runSearch();
-  void loadGenres("anime");
+  void loadGenres(state.type);
 }

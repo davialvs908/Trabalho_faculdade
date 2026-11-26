@@ -1,4 +1,4 @@
-import { STATUS_OPTIONS, scoreLabel, countLabel, yearOf, coverUrl, trailerUrl, genreNames, translateStatus } from "./labels.js";
+import { STATUS_OPTIONS, scoreLabel, countLabel, coverUrl } from "./labels.js";
 import { readCachedSynopsis } from "./translate.js";
 
 const catalog = () => document.querySelector("#catalog");
@@ -86,8 +86,7 @@ export function renderCards(items, type) {
 
     button.dataset.id = String(item.mal_id);
     button.textContent = title;
-    button.setAttribute("aria-haspopup", "dialog");
-    button.setAttribute("aria-label", `Ver detalhes de ${title}`);
+    button.href = `detalhe.html?tipo=${encodeURIComponent(type)}&id=${item.mal_id}`;
 
     image.alt = `Capa de ${title}`;
     image.referrerPolicy = "no-referrer";
@@ -123,17 +122,6 @@ function truncate(text, max) {
   return `${base}…`;
 }
 
-function setLink(anchor, href, label) {
-  if (!href) {
-    anchor.hidden = true;
-    anchor.removeAttribute("href");
-    return;
-  }
-  anchor.hidden = false;
-  anchor.href = href;
-  anchor.textContent = label;
-}
-
 function synopsisSource(text) {
   return (text || "").replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
 }
@@ -148,63 +136,4 @@ export function showSynopsis(malId, text, original) {
     synopsis.textContent = text ? truncate(text, 180) : "Sinopse não disponível.";
     if (note) note.hidden = !original;
   }
-  const dialog = document.querySelector("#details");
-  if (dialog?.open && dialog.dataset.id === id) {
-    fillSynopsis(document.querySelector("#modal-synopsis"), text);
-    document.querySelector("#modal-origin").hidden = !original;
-  }
-}
-
-function fillSynopsis(container, text) {
-  container.replaceChildren();
-  const clean = (text || "").trim();
-  if (!clean) {
-    const paragraph = document.createElement("p");
-    paragraph.textContent = "Sinopse não disponível.";
-    container.append(paragraph);
-    return;
-  }
-  for (const part of clean.split(/\n+/)) {
-    const paragraph = document.createElement("p");
-    paragraph.textContent = part.trim();
-    if (paragraph.textContent) container.append(paragraph);
-  }
-}
-
-export function fillModal(item, type) {
-  const title = item.title || "Título não informado";
-  const english = item.title_english && item.title_english !== title ? item.title_english : "";
-  document.querySelector("#modal-title").textContent = title;
-  const subtitle = document.querySelector("#modal-subtitle");
-  subtitle.hidden = !english;
-  subtitle.textContent = english;
-
-  const image = document.querySelector("#modal-cover");
-  const src = coverUrl(item);
-  image.alt = `Capa de ${title}`;
-  image.referrerPolicy = "no-referrer";
-  image.classList.toggle("is-missing", !src);
-  image.onerror = () => {
-    image.classList.add("is-missing");
-    image.alt = `Capa indisponível de ${title}`;
-  };
-  if (src) image.src = src;
-  else image.removeAttribute("src");
-
-  document.querySelector("#modal-score").textContent = scoreLabel(item.score);
-  document.querySelector("#modal-count").textContent = countLabel(item, type);
-  document.querySelector("#modal-status").textContent = translateStatus(item.status);
-  document.querySelector("#modal-genres").textContent = genreNames(item);
-  const year = yearOf(item, type);
-  document.querySelector("#modal-year").textContent = year ? String(year) : "Não informado";
-  document.querySelector("#modal-count-label").textContent = type === "manga" ? "Capítulos" : "Episódios";
-
-  const dialog = document.querySelector("#details");
-  dialog.dataset.id = String(item.mal_id);
-  const cached = readCachedSynopsis(item.mal_id);
-  fillSynopsis(document.querySelector("#modal-synopsis"), cached || item.synopsis);
-  const cardNote = document.querySelector(`.card-open[data-id="${dialog.dataset.id}"]`)?.closest("article")?.querySelector(".origin-note");
-  document.querySelector("#modal-origin").hidden = cardNote ? cardNote.hidden : true;
-  setLink(document.querySelector("#modal-trailer"), trailerUrl(item), "Assistir trailer");
-  setLink(document.querySelector("#modal-mal"), item.url || "", "Ver no MyAnimeList");
 }

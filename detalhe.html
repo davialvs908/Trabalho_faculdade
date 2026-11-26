@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Ficha · Catálogo de Animes e Mangás</title>
+    <meta name="description" content="Ficha de um anime ou mangá, com sinopse, equipe, personagens e recomendações.">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%238f1d1d'/%3E%3Cpath d='M8 8h16v3H8zm0 6h10v3H8zm0 6h16v3H8z' fill='%23fff8f4'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="css/styles.css">
+  </head>
+  <body class="page-detail">
+    <a class="skip" href="#ficha">Ir para a ficha</a>
+
+    <header class="site-header detail-header">
+      <div class="wrap detail-bar">
+        <a class="back" id="back" href="index.html">Voltar ao catálogo</a>
+        <p class="eyebrow">MyAnimeList · Tenrai</p>
+      </div>
+    </header>
+
+    <main class="wrap detail-main" id="ficha" aria-busy="true">
+      <p id="detail-status" class="visually-hidden" role="status">Carregando ficha…</p>
+
+      <div id="detail-loading" class="detail-skeleton" aria-hidden="true">
+        <div class="sk-cover"></div>
+        <div class="sk-copy">
+          <div class="sk-line short"></div>
+          <div class="sk-line"></div>
+          <div class="sk-line"></div>
+          <div class="sk-line"></div>
+        </div>
+      </div>
+
+      <div id="detail-missing" class="notice" hidden>
+        <h1 tabindex="-1">Título não encontrado</h1>
+        <p>Esse identificador não existe no catálogo, ou o link está incompleto.</p>
+        <a class="notice-action" href="index.html">Voltar ao catálogo</a>
+      </div>
+
+      <div id="detail-error" class="notice" role="alert" hidden>
+        <h1>Não foi possível abrir a ficha</h1>
+        <p id="detail-error-message"></p>
+        <button type="button" id="detail-retry">Tentar novamente</button>
+      </div>
+
+      <article id="detail" hidden>
+        <div class="detail-layout">
+          <div class="poster-card">
+            <img id="detail-cover" alt="" width="300" height="450">
+            <p id="detail-score" class="score"></p>
+          </div>
+          <div class="copy-card">
+            <p id="detail-kicker" class="kicker"></p>
+            <h1 id="detail-title" tabindex="-1"></h1>
+            <ul id="detail-titles" class="alt-titles"></ul>
+            <h2>Sinopse</h2>
+            <div id="detail-synopsis" class="synopsis-full"></div>
+            <p id="detail-origin" class="origin-note" hidden>Sinopse original</p>
+            <div class="action-links">
+              <a id="detail-trailer" href="" target="_blank" rel="noopener noreferrer" hidden>Assistir trailer</a>
+              <a id="detail-mal" href="" target="_blank" rel="noopener noreferrer" hidden>Ver no MyAnimeList</a>
+            </div>
+          </div>
+        </div>
+
+        <section class="detail-section" aria-labelledby="facts-heading">
+          <h2 id="facts-heading">Informações</h2>
+          <dl id="detail-facts" class="facts"></dl>
+        </section>
+
+        <section id="detail-background-section" class="detail-section" hidden aria-labelledby="background-heading">
+          <h2 id="background-heading">Contexto</h2>
+          <div id="detail-background" class="synopsis-full"></div>
+        </section>
+
+        <section id="detail-characters-section" class="detail-section" aria-labelledby="characters-heading">
+          <h2 id="characters-heading">Personagens principais</h2>
+          <p id="detail-characters-note" class="section-note" hidden></p>
+          <ul id="detail-characters" class="people"></ul>
+        </section>
+
+        <section id="detail-recommendations-section" class="detail-section" aria-labelledby="recommendations-heading">
+          <h2 id="recommendations-heading">Recomendações</h2>
+          <p id="detail-recommendations-note" class="section-note" hidden></p>
+          <ul id="detail-recommendations" class="recs"></ul>
+        </section>
+      </article>
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap">
+        <p class="student">DAVI ALMEIDA DOS SANTOS ALVES</p>
+        <p>Catálogo de estudo. Os dados vêm da <a href="https://api.tenrai.org/documentation" target="_blank" rel="noopener noreferrer">Tenrai API</a>, serviço não oficial e gratuito do MyAnimeList, sem chave de acesso. As sinopses em português vêm da <a href="https://mymemory.translated.net/doc/spec.php" target="_blank" rel="noopener noreferrer">MyMemory</a>.</p>
+      </div>
+    </footer>
+
+    <noscript>
+      <p class="noscript">Esta ficha precisa de JavaScript para consultar a API.</p>
+    </noscript>
+
+    <script type="module" src="js/detalhe.js"></script>
+  </body>
+</html>
