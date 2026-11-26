@@ -1,4 +1,5 @@
 import { STATUS_OPTIONS, scoreLabel, countLabel, yearOf, coverUrl, trailerUrl, genreNames, translateStatus } from "./labels.js";
+import { readCachedSynopsis } from "./translate.js";
 
 const catalog = () => document.querySelector("#catalog");
 const statusText = () => document.querySelector("#status-text");
@@ -103,8 +104,10 @@ export function renderCards(items, type) {
     }
 
     score.textContent = scoreLabel(item.score);
-    const summary = (item.synopsis || "").replace(/\s+/g, " ").trim();
-    synopsis.textContent = summary ? truncate(summary, 180) : "Sinopse não disponível.";
+    const summary = synopsisSource(item.synopsis);
+    const cached = readCachedSynopsis(item.mal_id);
+    synopsis.textContent = (cached || summary) ? truncate(cached || summary, 180) : "Sinopse não disponível.";
+    node.querySelector(".origin-note").hidden = true;
     count.textContent = countLabel(item, type);
     fragment.append(node);
   }
@@ -129,6 +132,27 @@ function setLink(anchor, href, label) {
   anchor.hidden = false;
   anchor.href = href;
   anchor.textContent = label;
+}
+
+function synopsisSource(text) {
+  return (text || "").replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
+}
+
+export function showSynopsis(malId, text, original) {
+  const id = String(malId);
+  const button = /^\d+$/.test(id) ? document.querySelector(`.card-open[data-id="${id}"]`) : null;
+  const card = button?.closest("article");
+  if (card) {
+    const synopsis = card.querySelector(".synopsis");
+    const note = card.querySelector(".origin-note");
+    synopsis.textContent = text ? truncate(text, 180) : "Sinopse não disponível.";
+    if (note) note.hidden = !original;
+  }
+  const dialog = document.querySelector("#details");
+  if (dialog?.open && dialog.dataset.id === id) {
+    fillSynopsis(document.querySelector("#modal-synopsis"), text);
+    document.querySelector("#modal-origin").hidden = !original;
+  }
 }
 
 function fillSynopsis(container, text) {
@@ -175,7 +199,12 @@ export function fillModal(item, type) {
   document.querySelector("#modal-year").textContent = year ? String(year) : "Não informado";
   document.querySelector("#modal-count-label").textContent = type === "manga" ? "Capítulos" : "Episódios";
 
-  fillSynopsis(document.querySelector("#modal-synopsis"), item.synopsis);
+  const dialog = document.querySelector("#details");
+  dialog.dataset.id = String(item.mal_id);
+  const cached = readCachedSynopsis(item.mal_id);
+  fillSynopsis(document.querySelector("#modal-synopsis"), cached || item.synopsis);
+  const cardNote = document.querySelector(`.card-open[data-id="${dialog.dataset.id}"]`)?.closest("article")?.querySelector(".origin-note");
+  document.querySelector("#modal-origin").hidden = cardNote ? cardNote.hidden : true;
   setLink(document.querySelector("#modal-trailer"), trailerUrl(item), "Assistir trailer");
   setLink(document.querySelector("#modal-mal"), item.url || "", "Ver no MyAnimeList");
 }

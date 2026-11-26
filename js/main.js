@@ -1,6 +1,7 @@
 import { buildGenresUrl, buildSearchUrl, enqueue, fetchJson, readCatalog, readGenres } from "./api.js";
 import { FALLBACK_GENRES, translateGenre, visibleGenres } from "./labels.js";
-import { clearError, fillModal, renderCards, renderGenres, renderStatusOptions, setLoading, setStatus, showError } from "./render.js";
+import { clearError, fillModal, renderCards, renderGenres, renderStatusOptions, setLoading, setStatus, showError, showSynopsis } from "./render.js";
+import { readCachedSynopsis, rememberSynopsis, translateSynopsis } from "./translate.js";
 
 const SEARCH_DEBOUNCE_MS = 400;
 
@@ -19,6 +20,7 @@ const dialog = document.querySelector("#details");
 const form = document.querySelector("#search-form");
 let debounceTimer = 0;
 let returnFocus = null;
+let translationController = null;
 
 function readForm() {
   const data = new FormData(form);
@@ -96,6 +98,7 @@ async function runSearch() {
   const id = state.requestId + 1;
   state.requestId = id;
   state.controller?.abort();
+  translationController?.abort();
   const controller = new AbortController();
   state.controller = controller;
   setLoading(true);
@@ -114,6 +117,7 @@ async function runSearch() {
     renderCards(items, state.type);
     const label = items.length === 1 ? "1 título encontrado." : `${items.length} títulos encontrados.`;
     setStatus(label);
+    translateList(items, id);
   } catch (error) {
     if (id !== state.requestId) return;
     if (error?.name === "AbortError") {
@@ -129,6 +133,38 @@ async function runSearch() {
   } finally {
     if (id === state.requestId) setLoading(false);
   }
+}
+
+function synopsisSource(text) {
+  return (text || "").replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
+}
+
+function translateList(items, searchId) {
+  translationController?.abort();
+  const controller = new AbortController();
+  translationController = controller;
+  void (async () => {
+    let stop = false;
+    for (const item of items) {
+      if (searchId !== state.requestId || controller.signal.aborted) return;
+      const malId = String(item.mal_id);
+      const source = synopsisSource(item.synopsis);
+      if (!source || readCachedSynopsis(malId)) continue;
+      if (stop) {
+        showSynopsis(malId, source, true);
+        continue;
+      }
+      const result = await translateSynopsis(source, controller.signal);
+      if (searchId !== state.requestId || result.aborted || controller.signal.aborted) return;
+      if (result.ok) {
+        rememberSynopsis(malId, result.text);
+        showSynopsis(malId, result.text, false);
+      } else {
+        showSynopsis(malId, source, true);
+        if (result.stop) stop = true;
+      }
+    }
+  })();
 }
 
 function scheduleSearch(immediate = false) {

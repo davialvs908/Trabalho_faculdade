@@ -6,6 +6,8 @@ Página em português para buscar animes e mangás. Os dados vêm da [Tenrai API
 
 Dá para buscar por nome, alternar entre anime e mangá, filtrar por gênero e status, ver os cards e abrir a ficha de cada título.
 
+As sinopses são traduzidas para português pela [MyMemory](https://mymemory.translated.net/doc/spec.php), sem chave. Cada trecho tem no máximo 500 bytes. O uso anônimo fica em 5.000 caracteres por dia no mesmo IP. Se a tradução não sair, a sinopse permanece em inglês com o aviso “Sinopse original”.
+
 Para abrir neste computador:
 
 ```bash
