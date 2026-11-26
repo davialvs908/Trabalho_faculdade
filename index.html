@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Catálogo de Animes e Mangás</title>
+    <meta name="description" content="Busca de animes e mangás com filtros de gênero e status, usando a Jikan API.">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%238f1d1d'/%3E%3Cpath d='M8 8h16v3H8zm0 6h10v3H8zm0 6h16v3H8z' fill='%23fff8f4'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="css/styles.css">
+  </head>
+  <body>
+    <a class="skip" href="#resultados">Ir para os resultados</a>
+
+    <header class="site-header">
+      <div class="wrap brand">
+        <p class="eyebrow">MyAnimeList · Jikan</p>
+        <h1>Catálogo de Animes e Mangás</h1>
+        <p class="lede">Busque um título, filtre por gênero e status e abra o card para ver a ficha completa.</p>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <search>
+        <h2 class="visually-hidden">Filtros de busca</h2>
+        <form id="search-form" class="filters">
+          <div class="field field-search">
+            <label for="q">Busca</label>
+            <input id="q" name="q" type="search" maxlength="100" placeholder="Ex.: Cowboy Bebop" autocomplete="off" enterkeyhint="search">
+          </div>
+
+          <fieldset>
+            <legend>Tipo</legend>
+            <div class="segment">
+              <label><input type="radio" name="type" value="anime" checked> Anime</label>
+              <label><input type="radio" name="type" value="manga"> Mangá</label>
+            </div>
+          </fieldset>
+
+          <div class="field">
+            <label for="genre">Gênero</label>
+            <select id="genre" name="genre">
+              <option value="">Todos</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="status">Status</label>
+            <select id="status" name="status"></select>
+          </div>
+
+          <button type="submit" class="submit">Buscar</button>
+        </form>
+      </search>
+
+      <section id="resultados" class="results" aria-busy="false">
+        <div class="results-bar">
+          <h2>Resultados</h2>
+          <p id="status-text" role="status">Carregando catálogo…</p>
+        </div>
+
+        <div id="error" class="error" role="alert" hidden>
+          <p id="error-message"></p>
+          <button type="button" id="retry">Tentar novamente</button>
+        </div>
+
+        <ul id="catalog" class="catalog"></ul>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap">
+        <p class="student">DAVI ALMEIDA DOS SANTOS ALVES</p>
+        <p>Catálogo de estudo. Os dados vêm da <a href="https://jikan.moe/" target="_blank" rel="noopener noreferrer">Jikan API</a>, serviço não oficial e gratuito do MyAnimeList, sem chave de acesso.</p>
+      </div>
+    </footer>
+
+    <dialog id="details" aria-labelledby="modal-title" aria-describedby="modal-synopsis" aria-modal="true">
+      <div class="modal-panel">
+        <img id="modal-cover" alt="" width="320" height="460">
+        <div class="modal-body">
+          <header class="modal-header">
+            <div>
+              <h2 id="modal-title"></h2>
+              <p id="modal-subtitle" class="subtitle" hidden></p>
+            </div>
+            <button type="button" id="modal-close">Fechar</button>
+          </header>
+          <dl class="facts">
+            <div>
+              <dt>Nota</dt>
+              <dd id="modal-score"></dd>
+            </div>
+            <div>
+              <dt id="modal-count-label">Episódios</dt>
+              <dd id="modal-count"></dd>
+            </div>
+            <div>
+              <dt>Status</dt>
+              <dd id="modal-status"></dd>
+            </div>
+            <div>
+              <dt>Ano</dt>
+              <dd id="modal-year"></dd>
+            </div>
+            <div class="fact-wide">
+              <dt>Gêneros</dt>
+              <dd id="modal-genres"></dd>
+            </div>
+          </dl>
+          <h3>Sinopse</h3>
+          <div id="modal-synopsis" class="synopsis-full"></div>
+          <div class="modal-links">
+            <a id="modal-trailer" href="" target="_blank" rel="noopener noreferrer" hidden>Assistir trailer</a>
+            <a id="modal-mal" href="" target="_blank" rel="noopener noreferrer" hidden>Ver no MyAnimeList</a>
+          </div>
+        </div>
+      </div>
+    </dialog>
+
+    <template id="card-template">
+      <li>
+        <article class="card">
+          <img alt="" width="300" height="450">
+          <div class="card-body">
+            <h3><button type="button" class="card-open"></button></h3>
+            <p class="score"></p>
+            <p class="synopsis"></p>
+            <p class="count"></p>
+          </div>
+        </article>
+      </li>
+    </template>
+
+    <template id="skeleton-template">
+      <li class="skeleton" aria-hidden="true">
+        <div class="sk-cover"></div>
+        <div class="sk-line"></div>
+        <div class="sk-line short"></div>
+        <div class="sk-line"></div>
+      </li>
+    </template>
+
+    <noscript>
+      <p class="noscript">Este catálogo precisa de JavaScript para consultar a API.</p>
+    </noscript>
+
+    <script type="module" src="js/main.js"></script>
+  </body>
+</html>
