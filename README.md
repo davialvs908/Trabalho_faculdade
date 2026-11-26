@@ -2,7 +2,7 @@
 
 Trabalho de DAVI ALMEIDA DOS SANTOS ALVES.
 
-Página em português para buscar animes e mangás. Os dados vêm da [Jikan API](https://jikan.moe/) (MyAnimeList não oficial, gratuito, sem chave).
+Página em português para buscar animes e mangás. Os dados vêm da [Tenrai API](https://api.tenrai.org/documentation) (catálogo público do MyAnimeList, gratuito, sem chave).
 
 Dá para buscar por nome, alternar entre anime e mangá, filtrar por gênero e status, ver os cards e abrir a ficha de cada título.
 

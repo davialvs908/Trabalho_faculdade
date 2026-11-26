@@ -1,6 +1,6 @@
-const BASE = "https://api.jikan.moe/v4";
+const BASE = "https://api.tenrai.org/v1";
 
-// A Jikan pede no máximo cerca de 3 requisições por segundo.
+// A API aceita cerca de 4 requisições por segundo.
 const MIN_GAP_MS = 400;
 const ATTEMPT_TIMEOUT_MS = 8000;
 const MAX_ATTEMPTS = 2;
